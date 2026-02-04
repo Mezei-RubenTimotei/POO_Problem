@@ -3,4 +3,4 @@ project(some)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(some main.cpp)
+add_executable(some main.cpp Book.cpp Member.cpp Library.cpp)
