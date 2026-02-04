@@ -4,15 +4,15 @@ pret: 3.5
 denumire: autor
 Tip: tufa
 -------------------------------------------------------------------
-serie: 9
+serie: 8
 inaltime: 14
-pret: 5.5
+pret: 5.6
 autor: george
 material: lut
 -------------------------------------------------------------------
 serie: 9
 inaltime: 11
 pret: 5.5
-autor: geo
+autor: Andrei
 material: lut
 -------------------------------------------------------------------

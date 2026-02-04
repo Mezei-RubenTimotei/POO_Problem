@@ -16,6 +16,7 @@ public:
         this -> serie = serie;
         this -> pret = pret;
     }
+    virtual ~Decoratiune() = default;
     virtual void Afisare(){
         cout << "-----------------------------" << endl;
         cout << "Inaltime : " << inaltime << endl;
@@ -29,15 +30,17 @@ public:
         fout << "Serie : " << serie << endl;
         fout << "Pret :" << pret << endl;
     }
-    int get_serie()
+    int get_serie() const
     {
         return serie;
     }
-    virtual string Autor(){
-        return "";
+    virtual const string& Autor() const {
+        static const string empty;
+        return empty;
     }
-    virtual string get_denumire(){
-        return "";
+    virtual const string& get_denumire() const {
+        static const string empty;
+        return empty;
     }
     void modificarePret(float pret_nou)
     {
@@ -51,29 +54,29 @@ enum Material{
     bronz,
     lut
 };
-string MaterialText[] = {"lemn" ,"bronz" , "lut"};
+const string MaterialText[] = {"lemn" ,"bronz" , "lut"};
 
 class Statueta : public Decoratiune{
     Material material;
     string autor;
 public:
-    Statueta(int inaltime,int serie, float pret, Material material , string autor):Decoratiune(inaltime,serie,pret){
+    Statueta(int inaltime,int serie, float pret, Material material, const string& autor):Decoratiune(inaltime,serie,pret){
         this -> material = material;
         this -> autor = autor;
     }
-    void Afisare(){
+    void Afisare() override {
         Decoratiune :: Afisare();
         cout << "Material : " << MaterialText[material] << endl;
         cout << "Autor : " << autor << endl;
         cout << "-----------------------------" << endl;
     }
-    void Scriere(){
+    void Scriere() override {
         Decoratiune :: Scriere();
         fout << "Material : " << MaterialText[material] << endl;
         fout << "Autor : " << autor << endl;
         fout << "-----------------------------" << endl;
     }
-    string Autor(){
+    const string& Autor() const override {
         return autor;
     }
 
@@ -84,31 +87,30 @@ enum Tip{
     copaci
 };
 
-string TipText[] = {"tufa","copaci"};
+const string TipText[] = {"tufa","copaci"};
 
 class Arbust : public Decoratiune{
     Tip tip;
     string denumire;
 public :
-    Arbust(int inaltime,int serie,float pret,Tip tip,string denumire):Decoratiune(inaltime,serie,pret)
+    Arbust(int inaltime,int serie,float pret,Tip tip, const string& denumire):Decoratiune(inaltime,serie,pret)
     {
         this -> tip = tip;
         this -> denumire = denumire;
     }
-    void Afisare(){
+    void Afisare() override {
         Decoratiune :: Afisare();
         cout << "Tip : " << TipText[tip] << endl;
         cout << "Denumire : " << denumire << endl;
         cout << "-----------------------------" << endl;
     }
-    void Scriere(){
+    void Scriere() override {
         Decoratiune :: Scriere();
         fout << "Tip : " << TipText[tip] << endl;
         fout << "Denumire : " << denumire << endl;
         fout << "-----------------------------" << endl;
     }
-    string get_denumire()
-    {
+    const string& get_denumire() const override {
         return denumire;
     }
 };
@@ -119,15 +121,15 @@ istream& operator >> (istream& in , Statueta *&c)
     float pret;
     string autor;
     cout << "Seria : ";
-    cin >> serie;
+    in >> serie;
     cout << "Inaltime : ";
-    cin >> inaltime;
+    in >> inaltime;
     cout << "Pret : ";
-    cin >> pret;
+    in >> pret;
     cout << "Autor : ";
-    cin >> autor;
+    in >> autor;
     cout << "0-lemn ,1-bronz ,2-lut : ";
-    cin >> nr;
+    in >> nr;
     c = new Statueta(inaltime,serie,pret,(Material)nr,autor);
     return in;
 }
@@ -138,15 +140,15 @@ istream& operator >> (istream& in , Arbust *&d)
     float pret;
     string den;
     cout << "Seria : ";
-    cin >> serie;
+    in >> serie;
     cout << "Inaltime : ";
-    cin >> inaltime;
+    in >> inaltime;
     cout << "Pret : ";
-    cin >> pret;
+    in >> pret;
     cout << "Denumire : ";
-    cin >> den;
+    in >> den;
     cout << "0 - tufa , 1 - copaci";
-    cin >> nr;
+    in >> nr;
     d = new Arbust(inaltime,serie,pret,(Tip)nr,den);
     return in;
 }
@@ -156,11 +158,11 @@ ifstream& operator >> (ifstream& in , Statueta *&c)
     int serie,inaltime,nr;
     float pret;
     string autor;
-    fin >> serie;
-    fin >> inaltime;
-    fin >> pret;
-    fin >> autor;
-    fin >> nr;
+    in >> serie;
+    in >> inaltime;
+    in >> pret;
+    in >> autor;
+    in >> nr;
     c = new Statueta(inaltime,serie,pret,(Material)nr,autor);
     return in;
 }
@@ -170,11 +172,11 @@ ifstream& operator >> (ifstream& in , Arbust *&d)
     int serie,inaltime,nr;
     float pret;
     string den;
-    fin >> serie;
-    fin >> inaltime;
-    fin >> pret;
-    fin >> den;
-    fin >> nr;
+    in >> serie;
+    in >> inaltime;
+    in >> pret;
+    in >> den;
+    in >> nr;
     d = new Arbust(inaltime,serie,pret,(Tip)nr,den);
     return in;
 }
@@ -200,35 +202,36 @@ void AdaugareFisier(list <Decoratiune*> &decoratii)
     int cat;
     while(fin >> cat)
     {
+        deco = NULL;
         if(cat == 0)
-            cin >> c, deco = c;
+            fin >> c, deco = c;
         if(cat == 1)
-            cin >> d, deco = d;
+            fin >> d, deco = d;
         if(deco != NULL)
             decoratii.push_back(deco);
     }
 }
 
-void ScriereFisier(list <Decoratiune*> decoratii)
+void ScriereFisier(const list <Decoratiune*>& decoratii)
 {
-    for (auto i = decoratii.begin(); i != decoratii.end(); i++) {
+    for (auto i = decoratii.begin(); i != decoratii.end(); ++i) {
         (*i) -> Scriere();
     }
 }
 
-void Afisare(list <Decoratiune*> decoratii)
+void Afisare(const list <Decoratiune*>& decoratii)
 {
-    for (auto i = decoratii.begin(); i != decoratii.end(); i++) {
+    for (auto i = decoratii.begin(); i != decoratii.end(); ++i) {
         (*i) -> Afisare();
     }
 }
 
-void Cautare(list <Decoratiune*> decoratii)
+void Cautare(const list <Decoratiune*>& decoratii)
 {
     string denumire;
     cout << "Cauta denumirea arbustului : ";
     cin >> denumire;
-    for (auto i = decoratii.begin(); i != decoratii.end(); i++) {
+    for (auto i = decoratii.begin(); i != decoratii.end(); ++i) {
         if((*i) -> get_denumire() == denumire)
             (*i) -> Afisare();
     }
@@ -239,8 +242,9 @@ void Stergere(list <Decoratiune*> &decoratii)
     int serie;
     cout << "Cauta serie : ";
     cin >> serie;
-    for (auto i = decoratii.begin(); i != decoratii.end(); i++) {
+    for (auto i = decoratii.begin(); i != decoratii.end(); ++i) {
         if((*i) -> get_serie() == serie){
+            delete *i;
             decoratii.erase(i);
             break;
         }
@@ -255,8 +259,8 @@ void ModificarePret(list <Decoratiune*> &decoratii){
     cin >> autor;
     cout << "Pretul nou";
     cin >> pret;
-    for (auto i = decoratii.begin(); i != decoratii.end(); i++) {
-        if((*i) -> Autor().compare(autor) == 0){
+    for (auto i = decoratii.begin(); i != decoratii.end(); ++i) {
+        if((*i) -> Autor() == autor){
             (*i) -> modificarePret(pret);
         }
     }
@@ -285,7 +289,7 @@ int main() {
         switch(op)
         {
             case 0:
-                exit(0);
+                break;
             case 1:
                 cout << "0 - Statueta , 1 - Arbust";
                 while(1){
@@ -321,6 +325,10 @@ int main() {
         }
     }while(op != 0);
 
+    // Eliberare memorie
+    for (auto i = decoratii.begin(); i != decoratii.end(); ++i) {
+        delete *i;
+    }
 
     return 0;
 }
